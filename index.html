@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="screen-orientation" content="portrait">
+    
+    <!-- PWA configuration -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#F8F7F2" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="QuickCart" />
+    
+    <!-- iOS Icon -->
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%236B705C%22/><text y=%2250%22 x=%2250%22 fill=%22white%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-size=%2250%22>🛒</text></svg>">
+    
+    <title>QuickCart</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').catch((err) => {
+            console.error('Service worker registration failed: ', err);
+          });
+        });
+      }
+    </script>
+  </body>
+</html>
+
