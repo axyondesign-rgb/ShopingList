@@ -1,8 +1,6 @@
-node_modules/
-build/
-dist/
-coverage/
-.DS_Store
-*.log
-.env*
-!.env.example
+{
+  "name": "Шопинг Менеджер - QuickCart",
+  "description": "Приложение для быстрой записи и управления списками покупок с напоминаниями.",
+  "requestFramePermissions": ["notifications"],
+  "majorCapabilities": []
+}

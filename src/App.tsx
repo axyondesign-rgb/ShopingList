@@ -85,28 +85,62 @@ export default function App() {
     localStorage.setItem(STORAGE_KEY_ITEMS, JSON.stringify(items));
   }, [items]);
 
-  // Notifications
+  // Notifications - улучшенная версия
   useEffect(() => {
-    if ('Notification' in window) {
-      if (Notification.permission === 'default') {
-        Notification.requestPermission();
+    // Запрос разрешения на уведомления при первом запуске
+    const requestNotificationPermission = async () => {
+      if ('Notification' in window && Notification.permission === 'default') {
+        try {
+          const permission = await Notification.requestPermission();
+          console.log('Notification permission:', permission);
+        } catch (error) {
+          console.error('Error requesting notification permission:', error);
+        }
       }
-    }
+    };
 
+    requestNotificationPermission();
+
+    // Проверка каждые 30 секунд (вместо 15) для экономии батареи
     const interval = setInterval(() => {
       const now = new Date();
       const currentDate = now.toISOString().split('T')[0];
       const currentTime = now.toTimeString().substring(0, 5);
 
+      console.log('Checking reminders:', currentDate, currentTime);
+
       setLists((prevLists) => {
         let changed = false;
         const updated = prevLists.map((list) => {
           if (list.date === currentDate && list.time === currentTime && !list.notified) {
+            console.log('Sending notification for:', list.name);
+            
             if ('Notification' in window && Notification.permission === 'granted') {
-              new Notification('Напоминание о покупках!', {
+              // Обычное уведомление
+              const notificationOptions: any = {
                 body: `Пора за покупками: ${list.name}`,
-              });
+                icon: '/icon.svg',
+                badge: '/icon.svg',
+                vibrate: [200, 100, 200],
+                tag: `shopping-${list.id}`,
+                requireInteraction: false,
+              };
+              const notification = new Notification('Напоминание о покупках! 🛒', notificationOptions);
+
+              // Закрыть через 10 секунд
+              setTimeout(() => notification.close(), 10000);
+
+              // Также отправляем через Service Worker
+              if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+                navigator.serviceWorker.controller.postMessage({
+                  type: 'SHOW_NOTIFICATION',
+                  list: list
+                });
+              }
+            } else {
+              console.warn('Notifications not available or not permitted');
             }
+            
             changed = true;
             return { ...list, notified: true };
           }
@@ -114,7 +148,7 @@ export default function App() {
         });
         return changed ? updated : prevLists;
       });
-    }, 15000);
+    }, 30000); // Проверка каждые 30 секунд
 
     return () => clearInterval(interval);
   }, []);
@@ -197,6 +231,32 @@ export default function App() {
 
   const deleteItem = (id: string) => {
     setItems(items.filter(i => i.id !== id));
+  };
+
+  // Функция для тестирования уведомлений
+  const testNotification = async () => {
+    if ('Notification' in window) {
+      if (Notification.permission === 'granted') {
+        const testNotificationOptions: any = {
+          body: 'Уведомления работают правильно!',
+          icon: '/icon.svg',
+          vibrate: [200, 100, 200],
+        };
+        new Notification('Тестовое уведомление! 🛒', testNotificationOptions);
+      } else if (Notification.permission === 'default') {
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+          new Notification('Разрешение получено! ✅', {
+            body: 'Теперь вы будете получать напоминания',
+            icon: '/icon.svg',
+          });
+        }
+      } else {
+        alert('Уведомления заблокированы. Разрешите их в настройках браузера.');
+      }
+    } else {
+      alert('Ваш браузер не поддерживает уведомления');
+    }
   };
 
   const activeList = lists.find(l => l.id === activeListId);
@@ -316,6 +376,15 @@ export default function App() {
           >
             <Plus className="w-5 h-5" />
             Создать список
+          </button>
+          
+          {/* Кнопка тестирования уведомлений */}
+          <button
+            onClick={testNotification}
+            className="mt-2 px-4 py-2.5 bg-[#E2E0D4] text-[#6B705C] rounded-full text-sm font-medium hover:bg-[#A5A58D] hover:text-white transition-colors w-full flex items-center justify-center gap-2 shrink-0"
+          >
+            <Bell className="w-4 h-4" />
+            Тест уведомлений
           </button>
         </aside>
 
