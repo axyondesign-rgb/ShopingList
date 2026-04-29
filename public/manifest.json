@@ -2,14 +2,14 @@
   "name": "MyShoppingList",
   "short_name": "MyList",
   "description": "Приложение для быстрой записи списка покупок",
-  "start_url": "/",
+  "start_url": "https://shoping-list-sv2b.vercel.app/",
   "display": "standalone",
   "background_color": "#F8F7F2",
   "theme_color": "#F8F7F2",
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "/icon.png",
+      "src": "/Icon.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
