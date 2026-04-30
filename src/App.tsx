@@ -119,8 +119,8 @@ export default function App() {
               // Обычное уведомление
               const notificationOptions: any = {
                 body: `Пора за покупками: ${list.name}`,
-                icon: '/icon.svg',
-                badge: '/icon.svg',
+                icon: '/icon.png',
+                badge: '/icon.png',
                 vibrate: [200, 100, 200],
                 tag: `shopping-${list.id}`,
                 requireInteraction: false,
@@ -239,7 +239,7 @@ export default function App() {
       if (Notification.permission === 'granted') {
         const testNotificationOptions: any = {
           body: 'Уведомления работают правильно!',
-          icon: '/icon.svg',
+          icon: '/icon.png',
           vibrate: [200, 100, 200],
         };
         new Notification('Тестовое уведомление! 🛒', testNotificationOptions);
@@ -248,7 +248,7 @@ export default function App() {
         if (permission === 'granted') {
           new Notification('Разрешение получено! ✅', {
             body: 'Теперь вы будете получать напоминания',
-            icon: '/icon.svg',
+            icon: '/icon.png',
           });
         }
       } else {

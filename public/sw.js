@@ -44,8 +44,8 @@ self.addEventListener('push', (event) => {
   
   const options = {
     body: event.data ? event.data.text() : 'Напоминание о покупках!',
-    icon: '/icon.svg',
-    badge: '/icon.svg',
+    icon: '/icon.png',
+    badge: '/icon.png',
     vibrate: [200, 100, 200],
     tag: 'shopping-reminder',
     requireInteraction: false
@@ -78,8 +78,8 @@ self.addEventListener('message', (event) => {
       if (list.date === currentDate && list.time === currentTime && !list.notified) {
         self.registration.showNotification('Напоминание о покупках!', {
           body: `Пора за покупками: ${list.name}`,
-          icon: '/icon.svg',
-          badge: '/icon.svg',
+          icon: '/icon.png',
+          badge: '/icon.png',
           vibrate: [300, 100, 300, 100, 300],
           tag: `reminder-${list.id}`,
           requireInteraction: true
