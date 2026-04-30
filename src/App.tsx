@@ -167,11 +167,21 @@ export default function App() {
     setIsListModalOpen(true);
   };
 
-  const handleSaveList = () => {
+  const handleSaveList = async () => {
     if (!listForm.name.trim()) return;
 
     const finalDate = isSettingsExpanded ? listForm.date : '';
     const finalTime = isSettingsExpanded ? listForm.time : '';
+
+    let permission = 'default';
+    if ('Notification' in window) {
+      permission = Notification.permission;
+      if ((finalDate || finalTime) && permission === 'default') {
+        permission = await Notification.requestPermission();
+      }
+    }
+
+    let newListId = editingList ? editingList.id : generateId();
 
     if (editingList) {
       setLists(lists.map(l => l.id === editingList.id ? { 
@@ -183,7 +193,7 @@ export default function App() {
       } : l));
     } else {
       const newList: ShoppingList = {
-        id: generateId(),
+        id: newListId,
         name: listForm.name,
         date: finalDate,
         time: finalTime,
@@ -191,6 +201,11 @@ export default function App() {
       };
       setLists([...lists, newList]);
     }
+    
+    if (finalDate && finalTime && permission === 'granted') {
+      await scheduleOfflineNotification(listForm.name, finalDate, finalTime, newListId);
+    }
+    
     setIsListModalOpen(false);
   };
 
@@ -235,27 +250,67 @@ export default function App() {
 
   // Функция для тестирования уведомлений
   const testNotification = async () => {
-    if ('Notification' in window) {
-      if (Notification.permission === 'granted') {
-        const testNotificationOptions: any = {
+    if (!('Notification' in window)) {
+      alert('Ваш браузер не поддерживает уведомления');
+      return;
+    }
+
+    let permission = Notification.permission;
+    if (permission === 'default') {
+      permission = await Notification.requestPermission();
+    }
+
+    if (permission === 'granted') {
+      const showNotification = async () => {
+        const title = 'Тестовое уведомление! 🛒';
+        const options: any = {
           body: 'Уведомления работают правильно!',
           icon: '/icon.png',
+          badge: '/icon.png',
           vibrate: [200, 100, 200],
         };
-        new Notification('Тестовое уведомление! 🛒', testNotificationOptions);
-      } else if (Notification.permission === 'default') {
-        const permission = await Notification.requestPermission();
-        if (permission === 'granted') {
-          new Notification('Разрешение получено! ✅', {
-            body: 'Теперь вы будете получать напоминания',
+
+        if ('serviceWorker' in navigator) {
+          const reg = await navigator.serviceWorker.ready;
+          if (reg && reg.showNotification) {
+            reg.showNotification(title, options);
+            return;
+          }
+        }
+        new Notification(title, options);
+      };
+      showNotification();
+    } else {
+      alert('Уведомления заблокированы. Разрешите их в настройках браузера.');
+    }
+  };
+
+  const scheduleOfflineNotification = async (listName: string, dateStr: string, timeStr: string, listId: string) => {
+    if (!dateStr || !timeStr) return;
+    if (!('Notification' in window) || Notification.permission !== 'granted') return;
+
+    const targetTime = new Date(`${dateStr}T${timeStr}:00`).getTime();
+    if (targetTime <= Date.now()) return;
+
+    if ('serviceWorker' in navigator) {
+      const reg = await navigator.serviceWorker.getRegistration();
+      if (reg && 'showTrigger' in Notification.prototype && typeof (window as any).TimestampTrigger !== 'undefined') {
+        try {
+          reg.showNotification('Напоминание о покупках! 🛒', {
+            body: `Пора за покупками: ${listName}`,
             icon: '/icon.png',
-          });
+            badge: '/icon.png',
+            vibrate: [200, 100, 200],
+            tag: `shopping-${listId}`,
+            showTrigger: new (window as any).TimestampTrigger(targetTime)
+          } as any);
+          console.log('Offline notification scheduled');
+        } catch (e) {
+          console.error('Failed to schedule offline notification', e);
         }
       } else {
-        alert('Уведомления заблокированы. Разрешите их в настройках браузера.');
+        console.warn('Offline scheduled notifications are not supported in this browser.');
       }
-    } else {
-      alert('Ваш браузер не поддерживает уведомления');
     }
   };
 
