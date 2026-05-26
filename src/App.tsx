@@ -117,15 +117,14 @@ export default function App() {
             
             if ('Notification' in window && Notification.permission === 'granted') {
               // Обычное уведомление
-              const notificationOptions: any = {
+              const notification = new Notification('Напоминание о покупках! 🛒', {
                 body: `Пора за покупками: ${list.name}`,
                 icon: '/icon.png',
                 badge: '/icon.png',
                 vibrate: [200, 100, 200],
                 tag: `shopping-${list.id}`,
                 requireInteraction: false,
-              };
-              const notification = new Notification('Напоминание о покупках! 🛒', notificationOptions);
+              });
 
               // Закрыть через 10 секунд
               setTimeout(() => notification.close(), 10000);
@@ -167,21 +166,11 @@ export default function App() {
     setIsListModalOpen(true);
   };
 
-  const handleSaveList = async () => {
+  const handleSaveList = () => {
     if (!listForm.name.trim()) return;
 
     const finalDate = isSettingsExpanded ? listForm.date : '';
     const finalTime = isSettingsExpanded ? listForm.time : '';
-
-    let permission = 'default';
-    if ('Notification' in window) {
-      permission = Notification.permission;
-      if ((finalDate || finalTime) && permission === 'default') {
-        permission = await Notification.requestPermission();
-      }
-    }
-
-    let newListId = editingList ? editingList.id : generateId();
 
     if (editingList) {
       setLists(lists.map(l => l.id === editingList.id ? { 
@@ -193,7 +182,7 @@ export default function App() {
       } : l));
     } else {
       const newList: ShoppingList = {
-        id: newListId,
+        id: generateId(),
         name: listForm.name,
         date: finalDate,
         time: finalTime,
@@ -201,11 +190,6 @@ export default function App() {
       };
       setLists([...lists, newList]);
     }
-    
-    if (finalDate && finalTime && permission === 'granted') {
-      await scheduleOfflineNotification(listForm.name, finalDate, finalTime, newListId);
-    }
-    
     setIsListModalOpen(false);
   };
 
@@ -248,71 +232,7 @@ export default function App() {
     setItems(items.filter(i => i.id !== id));
   };
 
-  // Функция для тестирования уведомлений
-  const testNotification = async () => {
-    if (!('Notification' in window)) {
-      alert('Ваш браузер не поддерживает уведомления');
-      return;
-    }
 
-    let permission = Notification.permission;
-    if (permission === 'default') {
-      permission = await Notification.requestPermission();
-    }
-
-    if (permission === 'granted') {
-      const showNotification = async () => {
-        const title = 'Тестовое уведомление! 🛒';
-        const options: any = {
-          body: 'Уведомления работают правильно!',
-          icon: '/icon.png',
-          badge: '/icon.png',
-          vibrate: [200, 100, 200],
-        };
-
-        if ('serviceWorker' in navigator) {
-          const reg = await navigator.serviceWorker.ready;
-          if (reg && reg.showNotification) {
-            reg.showNotification(title, options);
-            return;
-          }
-        }
-        new Notification(title, options);
-      };
-      showNotification();
-    } else {
-      alert('Уведомления заблокированы. Разрешите их в настройках браузера.');
-    }
-  };
-
-  const scheduleOfflineNotification = async (listName: string, dateStr: string, timeStr: string, listId: string) => {
-    if (!dateStr || !timeStr) return;
-    if (!('Notification' in window) || Notification.permission !== 'granted') return;
-
-    const targetTime = new Date(`${dateStr}T${timeStr}:00`).getTime();
-    if (targetTime <= Date.now()) return;
-
-    if ('serviceWorker' in navigator) {
-      const reg = await navigator.serviceWorker.getRegistration();
-      if (reg && 'showTrigger' in Notification.prototype && typeof (window as any).TimestampTrigger !== 'undefined') {
-        try {
-          reg.showNotification('Напоминание о покупках! 🛒', {
-            body: `Пора за покупками: ${listName}`,
-            icon: '/icon.png',
-            badge: '/icon.png',
-            vibrate: [200, 100, 200],
-            tag: `shopping-${listId}`,
-            showTrigger: new (window as any).TimestampTrigger(targetTime)
-          } as any);
-          console.log('Offline notification scheduled');
-        } catch (e) {
-          console.error('Failed to schedule offline notification', e);
-        }
-      } else {
-        console.warn('Offline scheduled notifications are not supported in this browser.');
-      }
-    }
-  };
 
   const activeList = lists.find(l => l.id === activeListId);
   const activeItems = items.filter(i => i.listId === activeListId);
@@ -433,14 +353,7 @@ export default function App() {
             Создать список
           </button>
           
-          {/* Кнопка тестирования уведомлений */}
-          <button
-            onClick={testNotification}
-            className="mt-2 px-4 py-2.5 bg-[#E2E0D4] text-[#6B705C] rounded-full text-sm font-medium hover:bg-[#A5A58D] hover:text-white transition-colors w-full flex items-center justify-center gap-2 shrink-0"
-          >
-            <Bell className="w-4 h-4" />
-            Тест уведомлений
-          </button>
+
         </aside>
 
         {/* Main Content */}
