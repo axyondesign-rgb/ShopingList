@@ -1,4 +1,4 @@
-const CACHE_NAME = 'myshoppinglist-cache-v1';
+const CACHE_NAME = 'quickcart-cache-v2';
 
 // Установка Service Worker
 self.addEventListener('install', (event) => {
@@ -31,9 +31,32 @@ self.addEventListener('activate', (event) => {
 
 // Обработка запросов
 self.addEventListener('fetch', (event) => {
+  // Для переходов по страницам (навигации) используем Network-First (сеть, затем кэш)
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+          return response;
+        })
+        .catch(() => {
+          return caches.match(event.request);
+        })
+    );
+    return;
+  }
+
+  // Для остальных статических ресурсов (картинки, JS, CSS) используем Cache-First
   event.respondWith(
     caches.match(event.request).then((response) => {
-      return response || fetch(event.request);
+      return response || fetch(event.request).then((netResponse) => {
+        if (netResponse && netResponse.status === 200) {
+          const clone = netResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+        }
+        return netResponse;
+      });
     })
   );
 });
