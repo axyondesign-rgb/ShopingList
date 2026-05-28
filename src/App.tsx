@@ -284,7 +284,7 @@ export default function App() {
                       }
                       setActiveListId(list.id);
                     }}
-                    className={`p-4 rounded-2xl cursor-pointer border transition-all relative overflow-hidden group ${
+                    className={`p-4 rounded-2xl cursor-pointer border transition-all relative overflow-hidden group touch-pan-y select-none ${
                       isActive 
                         ? 'bg-white border-[#E2E0D4] shadow-[0_4px_12px_rgba(0,0,0,0.03)]' 
                         : 'bg-transparent border-transparent hover:border-[#E2E0D4] hover:bg-white/50'
@@ -561,20 +561,38 @@ export default function App() {
                 </AnimatePresence>
               </div>
 
-              <div className="px-6 py-5 bg-[#F0EEE4] flex justify-end gap-3 rounded-b-3xl">
-                <button
-                  onClick={() => setIsListModalOpen(false)}
-                  className="px-5 py-2.5 text-[#6B705C] font-semibold hover:bg-[#E2E0D4]/50 rounded-full transition-colors shrink-0"
-                >
-                  Отмена
-                </button>
-                <button
-                  onClick={handleSaveList}
-                  disabled={!listForm.name.trim()}
-                  className="px-6 py-2.5 bg-[#6B705C] text-white font-semibold rounded-full hover:bg-[#A5A58D] disabled:opacity-50 transition-colors shadow-sm shrink-0"
-                >
-                  Сохранить
-                </button>
+              <div className="px-6 py-5 bg-[#F0EEE4] flex justify-between items-center rounded-b-3xl gap-3">
+                {editingList ? (
+                  <button
+                    onClick={(e) => {
+                      if (window.confirm('Вы уверены, что хотите удалить этот список?')) {
+                        handleDeleteList(editingList.id, e as any);
+                        setIsListModalOpen(false);
+                      }
+                    }}
+                    className="px-4 py-2.5 bg-[#E5A4A4] text-white font-semibold rounded-full hover:bg-[#D99595] transition-colors flex items-center gap-1.5 shrink-0 text-sm cursor-pointer"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    Удалить
+                  </button>
+                ) : (
+                  <div></div>
+                )}
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setIsListModalOpen(false)}
+                    className="px-5 py-2.5 text-[#6B705C] font-semibold hover:bg-[#E2E0D4]/50 rounded-full transition-colors shrink-0 cursor-pointer"
+                  >
+                    Отмена
+                  </button>
+                  <button
+                    onClick={handleSaveList}
+                    disabled={!listForm.name.trim()}
+                    className="px-6 py-2.5 bg-[#6B705C] text-white font-semibold rounded-full hover:bg-[#A5A58D] disabled:opacity-50 transition-colors shadow-sm shrink-0 cursor-pointer"
+                  >
+                    Сохранить
+                  </button>
+                </div>
               </div>
             </motion.div>
           </div>
