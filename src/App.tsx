@@ -47,7 +47,15 @@ function getInitialItems(): ShoppingItem[] {
 export default function App() {
   const [lists, setLists] = useState<ShoppingList[]>(getInitialLists);
   const [items, setItems] = useState<ShoppingItem[]>(getInitialItems);
-  const [activeListId, setActiveListId] = useState<string | null>(null);
+  
+  // Initialize active list state from URL hash for deep linking
+  const [activeListId, setActiveListId] = useState<string | null>(() => {
+    const hash = window.location.hash;
+    if (hash.startsWith('#list-')) {
+      return hash.replace('#list-', '');
+    }
+    return null;
+  });
 
   // Modal states for List
   const [isListModalOpen, setIsListModalOpen] = useState(false);
@@ -55,6 +63,35 @@ export default function App() {
   const [listForm, setListForm] = useState({ name: '', date: '', time: '' });
   const [isSettingsExpanded, setIsSettingsExpanded] = useState(false);
   const [swipedListId, setSwipedListId] = useState<string | null>(null);
+
+  // Listen to browser back/forward history events for swipe back gesture
+  useEffect(() => {
+    const handlePopState = () => {
+      const hash = window.location.hash;
+      if (hash.startsWith('#list-')) {
+        setActiveListId(hash.replace('#list-', ''));
+      } else {
+        setActiveListId(null);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  // Wrapper to select/deselect lists and push history states
+  const handleSelectList = (id: string | null) => {
+    if (id) {
+      window.history.pushState({ listId: id }, '', `#list-${id}`);
+      setActiveListId(id);
+    } else {
+      if (window.location.hash) {
+        window.history.back();
+      } else {
+        setActiveListId(null);
+      }
+    }
+  };
 
   // Click outside to reset swipe
   useEffect(() => {
@@ -198,7 +235,7 @@ export default function App() {
     setLists(lists.filter(l => l.id !== id));
     setItems(items.filter(i => i.listId !== id));
     if (activeListId === id) {
-      setActiveListId(null);
+      handleSelectList(null);
     }
   };
 
@@ -282,7 +319,7 @@ export default function App() {
                         setSwipedListId(null);
                         return;
                       }
-                      setActiveListId(list.id);
+                      handleSelectList(list.id);
                     }}
                     className={`p-4 rounded-2xl cursor-pointer border transition-all relative overflow-hidden group touch-pan-y select-none ${
                       isActive 
@@ -368,7 +405,7 @@ export default function App() {
               <header className="mb-10">
                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                   <div className="flex items-center gap-3">
-                    <button onClick={() => setActiveListId(null)} className="md:hidden text-[#8B8D85] hover:text-[#3F4238] transition-colors -ml-2 p-2">
+                    <button onClick={() => handleSelectList(null)} className="md:hidden text-[#8B8D85] hover:text-[#3F4238] transition-colors -ml-2 p-2">
                       <ChevronLeft className="w-6 h-6" />
                     </button>
                     <h1 className="font-sans text-[25px] font-normal leading-tight text-[#3F4238] m-0">
@@ -456,7 +493,7 @@ export default function App() {
       {/* MODAL */}
       <AnimatePresence>
         {isListModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-4 pt-16 sm:pt-4">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
