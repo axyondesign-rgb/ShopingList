@@ -1,8 +1,8 @@
 [{
-      "relation": ["delegate_permission/common.handle_all_urls"],
-      "target": {
-        "namespace": "android_app",
-        "package_name": "app.vercel.shoping_list_sv2b.twa",
-        "sha256_cert_fingerprints": ["72:0A:13:43:89:14:3A:A1:B1:34:8A:54:6A:EF:01:CA:93:1E:48:60:71:EA:5E:22:9E:DA:C5:7F:10:B6:3F:0D"]
-      }
-    }]
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "app.vercel.shoping_list_sv2b.twa",
+    "sha256_cert_fingerprints": ["6B:C7:0E:7D:81:AB:03:5A:29:A3:AC:6E:C0:19:21:A5:52:E1:69:1F:EF:8F:12:23:0D:D8:34:23:A7:F3:3C:3F"]
+  }
+}]
