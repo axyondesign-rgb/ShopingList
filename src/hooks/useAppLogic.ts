@@ -61,6 +61,7 @@ export function useAppLogic() {
   const [listForm, setListForm] = useState({ name: '', date: '', time: '' });
   const [isSettingsExpanded, setIsSettingsExpanded] = useState(false);
   const [swipedListId, setSwipedListId] = useState<string | null>(null);
+  const [swipedItemId, setSwipedItemId] = useState<string | null>(null);
 
   // Listen to browser back/forward history events for swipe back gesture
   useEffect(() => {
@@ -93,7 +94,10 @@ export function useAppLogic() {
 
   // Click outside to reset swipe
   useEffect(() => {
-    const handleGlobalClick = () => setSwipedListId(null);
+    const handleGlobalClick = () => {
+      setSwipedListId(null);
+      setSwipedItemId(null);
+    };
     document.addEventListener('click', handleGlobalClick);
 
     // Try to lock screen orientation to portrait on mobile devices
@@ -284,6 +288,8 @@ export function useAppLogic() {
     setIsSettingsExpanded,
     swipedListId,
     setSwipedListId,
+    swipedItemId,
+    setSwipedItemId,
     newItemName,
     setNewItemName,
     handleSelectList,

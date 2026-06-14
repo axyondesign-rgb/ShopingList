@@ -19,6 +19,8 @@ export function ShoppingAppUI(props: ShoppingAppUIProps) {
     setIsSettingsExpanded,
     swipedListId,
     setSwipedListId,
+    swipedItemId,
+    setSwipedItemId,
     newItemName,
     setNewItemName,
     handleSelectList,
@@ -37,12 +39,12 @@ export function ShoppingAppUI(props: ShoppingAppUIProps) {
   const sortedItems = [...activeItems].sort((a, b) => Number(a.isCompleted) - Number(b.isCompleted));
 
   return (
-    <div className="min-h-screen bg-[#F8F7F2] text-[#3F4238] font-sans flex items-center justify-center p-0 md:p-4 selection:bg-[#E2E0D4] selection:text-[#3F4238]">
+    <div className="min-h-screen bg-[#F8F7F2] text-[#3F4238] font-sans flex items-center justify-center p-0 md:p-4 selection:bg-[#E2E0D4] selection:text-[#3F4238] select-none">
       <div className="w-full md:max-w-[1024px] h-[100dvh] md:h-[768px] md:max-h-[90vh] bg-[#F8F7F2] md:shadow-2xl md:border border-[#E2E0D4] md:rounded-2xl overflow-hidden flex flex-col md:flex-row relative">
 
         {/* Sidebar - Groups */}
         <aside className={`w-full flex-1 md:flex-none md:w-[320px] h-full md:h-auto bg-[#F0EEE4] md:border-r border-[#E2E0D4] flex-col p-6 md:p-8 shrink-0 ${activeListId ? 'hidden md:flex' : 'flex'}`}>
-          <div className="font-serif italic text-2xl mb-10 text-[#6B705C] font-semibold">natural list.</div>
+          <div className="font-serif italic text-2xl mb-10 text-[#6B705C] font-semibold text-center">natural list.</div>
 
           <div className="flex-1 overflow-y-auto space-y-3 pb-6 pr-2">
             {lists.length === 0 ? (
@@ -80,10 +82,10 @@ export function ShoppingAppUI(props: ShoppingAppUIProps) {
                       }
                       handleSelectList(list.id);
                     }}
-                    className={`p-4 rounded-2xl cursor-pointer border transition-all relative overflow-hidden group touch-pan-y select-none ${
+                    className={`p-4 rounded-2xl cursor-pointer transition-all relative overflow-hidden group touch-pan-y select-none ${
                       isActive
-                        ? 'bg-white border-[#E2E0D4] shadow-[0_4px_12px_rgba(0,0,0,0.03)]'
-                        : 'bg-transparent border-transparent hover:border-[#E2E0D4] hover:bg-white/50'
+                        ? 'bg-white shadow-[0_4px_12px_rgba(0,0,0,0.03)]'
+                        : 'bg-transparent hover:bg-white/50'
                     }`}
                   >
                     <div className="font-semibold text-[16px] text-[#3F4238] flex items-center justify-between relative z-10">
@@ -189,40 +191,64 @@ export function ShoppingAppUI(props: ShoppingAppUIProps) {
                     </motion.div>
                   ) : (
                     <div className="flex flex-col gap-1">
-                      {sortedItems.map(item => (
-                        <motion.div
-                          key={item.id}
-                          layout
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, scale: 0.95 }}
-                          className="flex items-center py-3.5 border-b border-[#E2E0D4] group"
-                        >
-                          <button
-                            onClick={() => toggleItemCompletion(item.id)}
-                            className={`w-6 h-6 rounded-md border-2 mr-4 flex flex-shrink-0 items-center justify-center transition-colors ${
-                              item.isCompleted
-                                ? 'bg-[#A5A58D] border-[#A5A58D] text-white'
-                                : 'border-[#A5A58D] text-transparent hover:bg-[#E2E0D4]/30'
-                            }`}
+                      {sortedItems.map(item => {
+                        const isSwipedItem = swipedItemId === item.id;
+                        return (
+                          <motion.div
+                            key={item.id}
+                            layout
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            onPanEnd={(e, info) => {
+                              if (info.offset.x < -30) {
+                                setSwipedItemId(item.id);
+                              } else if (info.offset.x > 30 && isSwipedItem) {
+                                setSwipedItemId(null);
+                              }
+                            }}
+                            className="flex items-center py-3.5 border-b border-[#E2E0D4] group relative overflow-hidden touch-pan-y"
                           >
-                            <Check className="w-3.5 h-3.5" />
-                          </button>
+                            <button
+                              onClick={() => toggleItemCompletion(item.id)}
+                              className={`w-6 h-6 rounded-md border-2 mr-4 flex flex-shrink-0 items-center justify-center transition-colors ${
+                                item.isCompleted
+                                  ? 'bg-[#A5A58D] border-[#A5A58D] text-white'
+                                  : 'border-[#A5A58D] text-transparent hover:bg-[#E2E0D4]/30'
+                              }`}
+                            >
+                              <Check className="w-3.5 h-3.5" />
+                            </button>
 
-                          <span className={`text-[18px] flex-1 transition-all ${
-                            item.isCompleted ? 'text-[#8B8D85] line-through' : 'text-[#3F4238]'
-                          }`}>
-                            {item.name}
-                          </span>
+                            <span className={`text-[18px] flex-1 transition-all relative z-10 ${
+                              item.isCompleted ? 'text-[#8B8D85] line-through' : 'text-[#3F4238]'
+                            }`}>
+                              {item.name}
+                            </span>
 
-                          <button
-                            onClick={() => deleteItem(item.id)}
-                            className="p-2 text-[#E2E0D4] hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all ml-2 focus:opacity-100"
-                          >
-                            <X className="w-4 h-4" />
-                          </button>
-                        </motion.div>
-                      ))}
+                            <AnimatePresence>
+                              {isSwipedItem && (
+                                <motion.button
+                                  type="button"
+                                  initial={{ x: '100%' }}
+                                  animate={{ x: 0 }}
+                                  exit={{ x: '100%' }}
+                                  transition={{ type: 'spring', bounce: 0, duration: 0.3 }}
+                                  className="absolute top-0 right-0 bottom-0 w-[60px] bg-[#E5A4A4] flex items-center justify-center z-20 cursor-pointer hover:bg-[#D99595] transition-colors"
+                                  onClickCapture={(e: any) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    setSwipedItemId(null);
+                                    deleteItem(item.id);
+                                  }}
+                                >
+                                  <Trash2 className="w-4 h-4 text-white pointer-events-none" />
+                                </motion.button>
+                              )}
+                            </AnimatePresence>
+                          </motion.div>
+                        );
+                      })}
                     </div>
                   )}
                 </AnimatePresence>
@@ -252,7 +278,7 @@ export function ShoppingAppUI(props: ShoppingAppUIProps) {
       {/* MODAL */}
       <AnimatePresence>
         {isListModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-4 pt-16 sm:pt-4">
+          <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-4 pt-10 sm:pt-4">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -288,7 +314,7 @@ export function ShoppingAppUI(props: ShoppingAppUIProps) {
                     required
                     value={listForm.name}
                     onChange={e => setListForm({ ...listForm, name: e.target.value })}
-                    className="w-full bg-white border border-[#E2E0D4] rounded-2xl px-4 py-3 outline-none focus:ring-2 focus:ring-[#E2E0D4] focus:border-[#A5A58D] transition-all text-[#3F4238]"
+                    className="w-full bg-white border border-[#E2E0D4] rounded-2xl px-4 py-3 outline-none focus:ring-2 focus:ring-[#E2E0D4] focus:border-[#A5A58D] transition-all text-[#3F4238] select-text"
                     placeholder="Например: Продукты на неделю"
                     // autoFocus removed because it causes issues during transition sometimes, but keeping it if it was there
                     autoFocus
@@ -367,15 +393,15 @@ export function ShoppingAppUI(props: ShoppingAppUIProps) {
                         setIsListModalOpen(false);
                       }
                     }}
-                    className="px-4 py-2.5 bg-[#E5A4A4] text-white font-semibold rounded-full hover:bg-[#D99595] transition-colors flex items-center gap-1.5 shrink-0 text-sm cursor-pointer"
+                    className="p-2.5 bg-[#E5A4A4] text-white font-semibold rounded-full hover:bg-[#D99595] transition-colors flex items-center justify-center shrink-0 cursor-pointer w-10 h-10"
+                    title="Удалить"
                   >
                     <Trash2 className="w-4 h-4" />
-                    Удалить
                   </button>
                 ) : (
                   <div></div>
                 )}
-                <div className="flex gap-3">
+                <div className="flex gap-2 sm:gap-3">
                   <button
                     onClick={() => setIsListModalOpen(false)}
                     className="px-5 py-2.5 text-[#6B705C] font-semibold hover:bg-[#E2E0D4]/50 rounded-full transition-colors shrink-0 cursor-pointer"
