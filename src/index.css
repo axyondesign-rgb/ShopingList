@@ -1,0 +1,50 @@
+@import "tailwindcss";
+
+html, body, #root {
+  overscroll-behavior-y: none !important;
+  overscroll-behavior: none !important;
+  overflow: hidden;
+  height: 100%;
+  width: 100%;
+}
+
+/* Custom scrollbar properties that don't shift layout */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(165, 165, 141, 0.35) transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(165, 165, 141, 0.4);
+  border-radius: 9999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(107, 112, 92, 0.6);
+}
+
+/* Disable text selection globally except on inputs/editing containers */
+*, *::before, *::after {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+input, textarea, [contenteditable="true"] {
+  user-select: text !important;
+  -webkit-user-select: text !important;
+}
+
+/* Prevent pull-to-refresh and scroll chaining on all scroll containers */
+.overflow-y-auto {
+  overscroll-behavior-y: contain;
+}
+

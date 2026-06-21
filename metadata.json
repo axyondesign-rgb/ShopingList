@@ -1,0 +1,6 @@
+{
+  "name": "Шопинг Менеджер - QuickCart",
+  "description": "Приложение для быстрой записи и управления списками покупок с напоминаниями.",
+  "requestFramePermissions": ["notifications"],
+  "majorCapabilities": []
+}
