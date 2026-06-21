@@ -459,7 +459,7 @@ export default function App() {
             )}
           </div>
 
-          <div className="absolute bottom-0 left-0 right-0 p-6 bg-[#F0EEE4] border-t border-[#E2E0D4] z-30">
+          <div className="absolute bottom-0 left-0 right-0 p-6 sidebar-safe-pb bg-[#F0EEE4] border-t border-[#E2E0D4] z-30">
             <button
               onClick={() => handleOpenListModal()}
               className="px-4 py-3.5 bg-[#6B705C] text-white rounded-full font-semibold hover:bg-[#A5A58D] transition-colors w-full flex items-center justify-center gap-2 shadow-sm shrink-0 cursor-pointer text-[15px]"
@@ -480,7 +480,7 @@ export default function App() {
               <p className="text-lg font-serif">Выберите список или создайте новый</p>
             </div>
           ) : (
-            <div className="flex flex-col h-full p-6 md:p-12 lg:px-16 lg:py-12">
+            <div className="flex flex-col h-full p-6 safe-pb md:p-12 lg:px-16 lg:py-12">
               <header className="mb-10">
                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                   <div className="flex items-center gap-3">

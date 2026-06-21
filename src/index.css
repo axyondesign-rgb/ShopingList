@@ -48,3 +48,19 @@ input, textarea, [contenteditable="true"] {
   overscroll-behavior-y: contain;
 }
 
+/* Safe area bottom padding for mobile devices */
+.sidebar-safe-pb {
+  padding-bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+.safe-pb {
+  padding-bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+@media (min-width: 768px) {
+  .safe-pb {
+    padding-bottom: 3rem !important; /* Match md:p-12 / md:pb-12 */
+  }
+}
+
+
